@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>developer@portfolio:~$</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            font-family: 'Fira Code', 'IBM Plex Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 157, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .terminal-container {
+            width: 90%;
+            max-width: 1400px;
+            background: rgba(10, 10, 10, 0.95);
+            border-radius: 16px;
+            box-shadow: 
+                0 25px 80px rgba(0, 255, 157, 0.15),
+                0 0 120px rgba(0, 212, 255, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 157, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .window-header {
+            background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(0, 255, 157, 0.15);
+        }
+        
+        .window-btn {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .window-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .window-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .close { 
+            background: #ff5f57;
+            box-shadow: 0 0 8px rgba(255, 95, 87, 0.4);
+        }
+        .close:hover::before { background: rgba(255, 95, 87, 0.3); }
+        
+        .minimize { 
+            background: #febc2e;
+            box-shadow: 0 0 8px rgba(254, 188, 46, 0.4);
+        }
+        .minimize:hover::before { background: rgba(254, 188, 46, 0.3); }
+        
+        .maximize { 
+            background: #28c840;
+            box-shadow: 0 0 8px rgba(40, 200, 64, 0.4);
+        }
+        .maximize:hover::before { background: rgba(40, 200, 64, 0.3); }
+        
+        .window-title {
+            margin-left: 20px;
+            font-size: 0.9em;
+            color: #666;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        .terminal-body {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            height: 75vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .terminal-body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 157, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 157, 0.03) 3px
+                );
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100%); }
+        }
+        
+        .terminal-body::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .terminal-body::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-left: 1px solid rgba(0, 255, 157, 0.1);
+        }
+        
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 157, 0.3);
+            border-radius: 6px;
+            border: 2px solid #0a0a0a;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 157, 0.5);
+        }
+        
+        .command-line {
+            margin: 12px 0;
+            line-height: 2;
+            font-size: 0.95em;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .prompt {
+            color: #00ff9d;
+            font-weight: 700;
+            text-shadow: 
+                0 0 10px rgba(0, 255, 157, 0.6),
+                0 0 20px rgba(0, 255, 157, 0.3);
+        }
+        
+        .path {
+            color: #00d4ff;
+            text-shadow: 
+                0 0 10px rgba(0, 212, 255, 0.5),
+                0 0 20px rgba(0, 212, 255, 0.2);
+            font-weight: 500;
+        }
+        
+        .command {
+            color: #fff;
+            font-weight: 400;
+        }
+        
+        .output {
+            color: #b0b0b0;
+            margin-left: 0;
+        }
+        
+        .output-success {
+            color: #00ff9d;
+        }
+        
+        .output-warning {
+            color: #ffaa00;
+        }
+        
+        .output-error {
+            color: #ff4466;
+        }
+
+        .skill-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 255, 157, 0.02);
+            border: 1px solid rgba(0, 255, 157, 0.15);
+            border-radius: 8px;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .skill-name {
+            color: #00d4ff;
+            font-size: 1.1em;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        }
+
+        .skill-level {
+            color: #ffaa00;
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 4px 12px;
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00d4ff);
+            box-shadow: 
+                0 0 10px rgba(0, 255, 157, 0.6),
+                0 0 20px rgba(0, 212, 255, 0.4);
+            position: relative;
+            transition: width 1s ease-out;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .subskills {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .subskill {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid #00ff9d;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #b0b0b0;
+            transition: all 0.3s;
+        }
+
+        .subskill:hover {
+            background: rgba(0, 255, 157, 0.08);
+            border-left-color: #00d4ff;
+            transform: translateX(5px);
+        }
+
+        .subskill::before {
+            content: '▸ ';
+            color: #00ff9d;
+            font-weight: 700;
+        }
+        
+        .project-box {
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 25px;
+            margin: 20px 0;
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.02) 0%, rgba(0, 212, 255, 0.02) 100%);
+            border-left: 4px solid #00d4ff;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 255, 157, 0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .project-box:hover::before {
+            opacity: 1;
+        }
+
+        .project-box:hover {
+            border-left-color: #00ff9d;
+            box-shadow: 
+                0 10px 30px rgba(0, 212, 255, 0.15),
+                inset 0 0 50px rgba(0, 255, 157, 0.03);
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            padding: 6px 14px;
+            margin: 5px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tech-badge:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            border-left: 4px solid #00ff9d;
+            padding: 18px;
+            margin: 15px 0;
+            overflow-x: auto;
+            color: #c586c0;
+            font-size: 0.85em;
+            line-height: 1.7;
+            border-radius: 6px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #00ff9d;
+            animation: blink 1s infinite;
+            margin-left: 4px;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 157, 0.8),
+                0 0 20px rgba(0, 255, 157, 0.4);
+            position: relative;
+        }
+
+        .cursor::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: rgba(0, 255, 157, 0.3);
+            filter: blur(4px);
+            z-index: -1;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        a {
+            color: #00d4ff;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        a:hover {
+            color: #00ff9d;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.6);
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff9d, #00d4ff);
+            transition: width 0.3s;
+        }
+
+        a:hover::after {
+            width: 100%;
+        }
+
+        .control-panel {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(26, 26, 26, 0.95);
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 157, 0.2);
+            z-index: 1000;
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(0, 255, 157, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 12px 20px;
+            margin: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            text-align: left;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.4),
+                inset 0 0 20px rgba(0, 212, 255, 0.1);
+            transform: translateX(3px);
+        }
+
+        #userInput {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95em;
+            outline: none;
+            width: 70%;
+            caret-color: #00ff9d;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .help-text {
+            color: #666;
+            font-size: 0.75em;
+            margin-top: 12px;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .xp-badge {
+            display: inline-block;
+            color: #ffaa00;
+            font-size: 0.85em;
+            margin-left: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <button class="control-btn" onclick="toggleSound()">🔊 Sound: ON</button>
+        <button class="control-btn" onclick="restartAnimation()">↻ Restart Animation</button>
+        <div class="help-text">
+            Available commands:<br>
+            whoami • skills • projects<br>
+            clear • help
+        </div>
+    </div>
+
+    <div class="terminal-container">
+        <div class="window-header">
+            <div class="window-btn close"></div>
+            <div class="window-btn minimize"></div>
+            <div class="window-btn maximize"></div>
+            <span class="window-title">developer@portfolio:~$</span>
+        </div>
+        
+        <div class="terminal-body" id="terminal">
+            <!-- Content will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        let soundEnabled = true;
+        let audioContext;
+        let typingSpeed = 20;
+        let isAnimating = true;
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        const skillsData = `
+<div class="skill-section">
+    <div class="skill-header">
+        <span class="skill-name">Frontend Development</span>
+        <span class="skill-level">Level 85 <span class="xp-badge">[12,450 XP]</span></span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 85%"></div>
+    </div>
+    <div class="subskills">
+        <div class="subskill">React (Advanced)</div>
+        <div class="subskill">Vue.js (Advanced)</div>
+        <div class="subskill">TypeScript (Expert)</div>
+        <div class="subskill">Next.js (Advanced)</div>
+        <div class="subskill">Tailwind CSS (Expert)</div>
+        <div class="subskill">Redux/Zustand (Advanced)</div>
+        <div class="subskill">WebSocket (Intermediate)</div>
+        <div class="subskill">PWA Development (Advanced)</div>
+    </div>
+</div>
+
+<div class="skill-section">
+    <div class="skill-header">
+        <span class="skill-name">Backend Development</span>
+        <span class="skill-level">Level 78 <span class="xp-badge">[10,890 XP]</span></span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 78%"></div>
+    </div>
+    <div class="subskills">
+        <div class="subskill">Node.js (Advanced)</div>
+        <div class="subskill">Python/Django (Expert)</div>
+        <div class="subskill">FastAPI (Advanced)</div>
+        <div class="subskill">Express.js (Expert)</div>
+        <div class="subskill">GraphQL (Intermediate)</div>
+        <div class="subskill">RESTful APIs (Expert)</div>
+        <div class="subskill">Microservices (Advanced)</div>
+        <div class="subskill">OAuth2/JWT (Advanced)</div>
+    </div>
+</div>
+
+<div class="skill-section">
+    <div class="skill-header">
+        <span class="skill-name">Database & Storage</span>
+        <span class="skill-level">Level 72 <span class="xp-badge">[9,240 XP]</span></span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 72%"></div>
+    </div>
+    <div class="subskills">
+        <div class="subskill">PostgreSQL (Advanced)</div>
+        <div class="subskill">MongoDB (Advanced)</div>
+        <div class="subskill">Redis (Intermediate)</div>
+        <div class="subskill">MySQL (Advanced)</div>
+        <div class="subskill">Prisma ORM (Advanced)</div>
+        <div class="subskill">Database Design (Expert)</div>
+        <div class="subskill">Query Optimization (Advanced)</div>
+    </div>
+</div>
+
+<div class="skill-section">
+    <div class="skill-header">
+        <span class="skill-name">DevOps & Tools</span>
+        <span class="skill-level">Level 68 <span class="xp-badge">[8,120 XP]</span></span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 68%"></div>
+    </div>
+    <div class="subskills">
+        <div class="subskill">Docker (Advanced)</div>
+        <div class="subskill">Git/GitHub (Expert)</div>
+        <div class="subskill">CI/CD Pipelines (Advanced)</div>
+        <div class="subskill">Linux/Bash (Advanced)</div>
+        <div class="subskill">Nginx (Intermediate)</div>
+        <div class="subskill">AWS/Cloud (Intermediate)</div>
+        <div class="subskill">GitHub Actions (Advanced)</div>
+    </div>
+</div>
+
+<div class="skill-section">
+    <div class="skill-header">
+        <span class="skill-name">Problem Solving & Algorithms</span>
+        <span class="skill-level">Level 81 <span class="xp-badge">[11,670 XP]</span></span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 81%"></div>
+    </div>
+    <div class="subskills">
+        <div class="subskill">Data Structures (Advanced)</div>
+        <div class="subskill">Algorithm Design (Advanced)</div>
+        <div class="subskill">System Design (Intermediate)</div>
+        <div class="subskill">Code Optimization (Advanced)</div>
+        <div class="subskill">Design Patterns (Advanced)</div>
+        <div class="subskill">Clean Code (Expert)</div>
+    </div>
+</div>`;
+
+        const projectsData = `
+<div class="project-box">
+<div class="output-warning">━━━ PROJECT: E-Commerce Platform ━━━</div>
+<div class="output">Status: <span class="output-warning">IN_DEVELOPMENT (75% Complete)</span></div>
+<div class="output">Tech Stack: 
+    <span class="tech-badge">React</span>
+    <span class="tech-badge">Node.js</span>
+    <span class="tech-badge">MongoDB</span>
+    <span class="tech-badge">Stripe API</span>
+    <span class="tech-badge">Redis</span>
+</div>
+<div class="output"><br>Implemented Features:</div>
+<div class="output-success">  ▸ JWT Authentication & Authorization System</div>
+<div class="output-success">  ▸ Product Catalog with Advanced Filtering & Search</div>
+<div class="output-success">  ▸ Shopping Cart with Real-time State Management</div>
+<div class="output-success">  ▸ Payment Gateway Integration (Stripe)</div>
+<div class="output-success">  ▸ Order Management & Tracking System</div>
+<div class="output-success">  ▸ Admin Dashboard with Analytics</div>
+<div class="code-block">// Redux middleware with caching strategy
+const cartMiddleware = store => next => action => {
+  if (action.type === 'ADD_TO_CART') {
+    const state = store.getState();
+    const cartData = {
+      items: state.cart.items,
+      total: state.cart.total,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('cart', JSON.stringify(cartData));
+    // Sync with backend
+    syncCartWithServer(cartData);
+  }
+  return next(action);
+};</div>
+<div class="output">Repository: <a href="#">github.com/yourname/ecommerce-platform</a></div>
+<div class="output">Live Demo: <a href="#">demo.ecommerce.dev</a></div>
+</div>
+
+<div class="project-box">
+<div class="output-warning">━━━ PROJECT: Real-Time Chat Application ━━━</div>
+<div class="output">Status: <span class="output-warning">IN_DEVELOPMENT (60% Complete)</span></div>
+<div class="output">Tech Stack: 
+    <span class="tech-badge">Vue.js 3</span>
+    <span class="tech-badge">Socket.io</span>
+    <span class="tech-badge">Express</span>
+    <span class="tech-badge">Redis</span>
+    <span class="tech-badge">PostgreSQL</span>
+</div>
+<div class="output"><br>Implemented Features:</div>
+<div class="output-success">  ▸ WebSocket Real-Time Messaging Engine</div>
+<div class="output-success">  ▸ Room-Based Chat with Private Messaging</div>
+<div class="output-success">  ▸ User Presence & Typing Indicators</div>
+<div class="output-success">  ▸ Message Persistence & History with Pagination</div>
+<div class="output-success">  ▸ File Upload & Sharing (Images, Documents)</div>
+<div class="output-success">  ▸ Message Reactions & Threads</div>
+<div class="code-block">// Socket.io with Redis adapter for horizontal scaling
+const io = require('socket.io')(server, {
+  adapter: require('socket.io-redis')({
+    host: 'localhost',
+    port: 6379
+  })
+});
+
+io.on('connection', async (socket) => {
+  socket.on('join-room', async (roomId, userId) => {
+    await socket.join(roomId);
+    await redisClient.sAdd(\`room:\${roomId}:users\`, userId);
+    
+    // Broadcast presence
+    const onlineUsers = await redisClient.sMembers(\`room:\${roomId}:users\`);
+    io.to(roomId).emit('user-presence', { userId, onlineUsers });
+  });
+});</div>
+<div class="output">Repository: <a href="#">github.com/yourname/realtime-chat</a></div>
+</div>
+
+<div class="project-box">
+<div class="output-warning">━━━ PROJECT: Task Management API ━━━</div>
+<div class="output">Status: <span class="output-warning">IN_DEVELOPMENT (80% Complete)</span></div>
+<div class="output">Tech Stack: 
+    <span class="tech-badge">Python</span>
+    <span class="tech-badge">FastAPI</span>
+    <span class="tech-badge">PostgreSQL</span>
+    <span class="tech-badge">Docker</span>
+    <span class="tech-badge">Pytest</span>
+</div>
+<div class="output"><br>Implemented Features:</div>
+<div class="output-success">  ▸ RESTful API with OpenAPI Documentation</div>
+<div class="output-success">  ▸ OAuth2 + JWT Authentication Flow</div>
+<div class="output-success">  ▸ Advanced Query Filtering & Pagination</div>
+<div class="output-success">  ▸ Rate Limiting & Request Caching</div>
+<div class="output-success">  ▸ Background Task Processing (Celery)</div>
+<div class="output-success">  ▸ Comprehensive Test Coverage (95%)</div>
+<div class="code-block"># Custom dependency injection with role-based access
+from functools import wraps
+from fastapi import Depends, HTTPException, status
+
+async def require_role(*allowed_roles: str):
+    async def role_checker(
+        current_user: User = Depends(get_current_user)
+    ):
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions"
+            )
+        return current_user
+    return role_checker
+
+@router.post("/tasks", dependencies=[Depends(require_role("admin", "manager"))])
+async def create_task(task: TaskCreate, db: Session = Depends(get_db)):
+    return await task_service.create(db, task)</div>
+<div class="output">Repository: <a href="#">github.com/yourname/task-api</a></div>
+<div class="output">API Docs: <a href="#">api-docs.taskmanager.dev</a></div>
+</div>`;
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.querySelector('.control-btn').textContent = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        }
+
+        function playTypingSound() {
+            if (!soundEnabled) return;
+            
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // Create a more realistic mechanical keyboard sound
+            const now = audioContext.currentTime;
+            
+            // White noise for the "crunch"
+            const bufferSize = audioContext.sampleRate * 0.05;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.1;
+            }
+            
+            const noise = audioContext.createBufferSource();
+            noise.buffer = buffer;
+            
+            // Filter for a more realistic sound
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1000 + Math.random() * 500;
+            filter.Q.value = 2;
+            
+            // Envelope
+            const envelope = audioContext.createGain();
+            envelope.gain.setValueAtTime(0, now);
+            envelope.gain.linearRampToValueAtTime(0.15, now + 0.005);
+            envelope.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            
+            // Add a click sound
+            const clickOsc = audioContext.createOscillator();
+            clickOsc.frequency.value = 150;
+            clickOsc.type = 'square';
+            
+            const clickGain = audioContext.createGain();
+            clickGain.gain.setValueAtTime(0.08, now);
+            clickGain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+            
+            // Connect everything
+            noise.connect(filter);
+            filter.connect(envelope);
+            envelope.connect(audioContext.destination);
+            
+            clickOsc.connect(clickGain);
+            clickGain.connect(audioContext.destination);
+            
+            // Play
+            noise.start(now);
+            noise.stop(now + 0.05);
+            clickOsc.start(now);
+            clickOsc.stop(now + 0.02);
+        }
+
+        function typeText(element, text, speed = typingSpeed) {
+            return new Promise((resolve) => {
+                let index = 0;
+                const interval = setInterval(() => {
+                    if (index < text.length) {
+                        element.textContent += text[index];
+                        playTypingSound();
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, speed);
+            });
+        }
+
+        function typeHTML(element, html) {
+            element.innerHTML = html;
+            return new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        function addOutput(text, className = 'output') {
+            const terminal = document.getElementById('terminal');
+            const output = document.createElement('div');
+            output.className = className;
+            output.textContent = text;
+            terminal.appendChild(output);
+            scrollToBottom();
+        }
+
+        function addHTMLOutput(html) {
+            const terminal = document.getElementById('terminal');
+            const output = document.createElement('div');
+            output.innerHTML = html;
+            terminal.appendChild(output);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const terminal = document.getElementById('terminal');
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function executeCommand(cmd) {
+            const command = cmd.trim().toLowerCase();
+            
+            switch(command) {
+                case 'whoami':
+                    addOutput('developer@portfolio:~$ whoami', 'output-success');
+                    addOutput('─────────────────────────────────────', 'output');
+                    addOutput('Name: Your Full Name', 'output');
+                    addOutput('Role: Full Stack Developer', 'output');
+                    addOutput('Email: your.email@example.com', 'output');
+                    addOutput('GitHub: github.com/yourname', 'output');
+                    addOutput('Location: Your City, Country', 'output');
+                    addOutput('Years of Experience: 5+', 'output');
+                    break;
+                    
+                case 'skills':
+                case 'get-skills':
+                    addHTMLOutput(skillsData);
+                    break;
+                    
+                case 'projects':
+                case 'get-childitem .\\projects\\ -recurse':
+                case 'ls projects':
+                    addHTMLOutput(projectsData);
+                    break;
+                    
+                case 'clear':
+                case 'cls':
+                    document.getElementById('terminal').innerHTML = '';
+                    break;
+                    
+                case 'help':
+                    addHTMLOutput(`
+<div class="output-success">════════════════════ AVAILABLE COMMANDS ════════════════════</div>
+<div class="output"><br></div>
+<div class="output">  <span class="output-success">whoami</span>          Display developer information and contact</div>
+<div class="output">  <span class="output-success">skills</span>          Show all technical skills with levels and XP</div>
+<div class="output">  <span class="output-success">projects</span>        List all projects with details and code samples</div>
+<div class="output">  <span class="output-success">clear / cls</span>     Clear the terminal screen</div>
+<div class="output">  <span class="output-success">help</span>            Display this help message</div>
+<div class="output"><br></div>
+<div class="output">  Use ↑↓ arrows to navigate command history</div>
+<div class="output">═══════════════════════════════════════════════════════════</div>
+                    `);
+                    break;
+                    
+                case '':
+                    break;
+                    
+                default:
+                    addOutput(`bash: ${cmd}: command not found`, 'output-error');
+                    addOutput('Type "help" for available commands', 'output');
+            }
+        }
+
+        async function runTerminal() {
+            isAnimating = true;
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML = '';
+
+            // Initial header
+            const header = document.createElement('div');
+            header.className = 'command-line';
+            terminal.appendChild(header);
+            await typeText(header, 'GNU bash, version 5.1.16(1)-release (x86_64-pc-linux-gnu)', 30);
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const copyright = document.createElement('div');
+            copyright.className = 'output';
+            terminal.appendChild(copyright);
+            await typeText(copyright, 'Type "help" for available commands.', 15);
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            terminal.innerHTML += '<br>';
+
+            // Command 1: whoami
+            const cmd1 = document.createElement('div');
+            cmd1.className = 'command-line';
+            terminal.appendChild(cmd1);
+            const prompt1 = document.createElement('span');
+            prompt1.className = 'prompt';
+            cmd1.appendChild(prompt1);
+            await typeText(prompt1, 'developer@portfolio', 40);
+            const sep1 = document.createElement('span');
+            sep1.textContent = ':';
+            sep1.style.color = '#fff';
+            cmd1.appendChild(sep1);
+            const path1 = document.createElement('span');
+            path1.className = 'path';
+            cmd1.appendChild(path1);
+            await typeText(path1, '~', 30);
+            const dollar1 = document.createElement('span');
+            dollar1.textContent = '$ ';
+            dollar1.style.color = '#fff';
+            cmd1.appendChild(dollar1);
+            const command1 = document.createElement('span');
+            command1.className = 'command';
+            cmd1.appendChild(command1);
+            await typeText(command1, 'whoami', 50);
+            
+            await new Promise(resolve => setTimeout(resolve, 400));
+            addOutput('developer@portfolio:~$ whoami', 'output-success');
+            addOutput('─────────────────────────────────────', 'output');
+            addOutput('Name: Your Full Name', 'output');
+            addOutput('Role: Full Stack Developer', 'output');
+            addOutput('Email: your.email@example.com', 'output');
+            addOutput('GitHub: github.com/yourname', 'output');
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Command 2: skills
+            const cmd2 = document.createElement('div');
+            cmd2.className = 'command-line';
+            terminal.appendChild(cmd2);
+            const prompt2 = document.createElement('span');
+            prompt2.className = 'prompt';
+            cmd2.appendChild(prompt2);
+            await typeText(prompt2, 'developer@portfolio', 40);
+            const sep2 = document.createElement('span');
+            sep2.textContent = ':';
+            sep2.style.color = '#fff';
+            cmd2.appendChild(sep2);
+            const path2 = document.createElement('span');
+            path2.className = 'path';
+            cmd2.appendChild(path2);
+            await typeText(path2, '~', 30);
+            const dollar2 = document.createElement('span');
+            dollar2.textContent = '$ ';
+            dollar2.style.color = '#fff';
+            cmd2.appendChild(dollar2);
+            const command2 = document.createElement('span');
+            command2.className = 'command';
+            cmd2.appendChild(command2);
+            await typeText(command2, 'skills', 50);
+
+            await new Promise(resolve => setTimeout(resolve, 400));
+            addHTMLOutput(skillsData);
+
+            await new Promise(resolve => setTimeout(resolve, 1200));
+
+            // Command 3: projects
+            const cmd3 = document.createElement('div');
+            cmd3.className = 'command-line';
+            terminal.appendChild(cmd3);
+            const prompt3 = document.createElement('span');
+            prompt3.className = 'prompt';
+            cmd3.appendChild(prompt3);
+            await typeText(prompt3, 'developer@portfolio', 40);
+            const sep3 = document.createElement('span');
+            sep3.textContent = ':';
+            sep3.style.color = '#fff';
+            cmd3.appendChild(sep3);
+            const path3 = document.createElement('span');
+            path3.className = 'path';
+            cmd3.appendChild(path3);
+            await typeText(path3, '~', 30);
+            const dollar3 = document.createElement('span');
+            dollar3.textContent = '$ ';
+            dollar3.style.color = '#fff';
+            cmd3.appendChild(dollar3);
+            const command3 = document.createElement('span');
+            command3.className = 'command';
+            cmd3.appendChild(command3);
+            await typeText(command3, 'projects', 50);
+
+            await new Promise(resolve => setTimeout(resolve, 600));
+            addHTMLOutput(projectsData);
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // Enable interactive mode
+            isAnimating = false;
+            createInputLine();
+        }
+
+        function createInputLine() {
+            const terminal = document.getElementById('terminal');
+            
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'command-line input-line';
+            inputContainer.id = 'inputContainer';
+            
+            const prompt = document.createElement('span');
+            prompt.className = 'prompt';
+            prompt.textContent = 'developer@portfolio';
+            
+            const sep = document.createElement('span');
+            sep.textContent = ':';
+            sep.style.color = '#fff';
+            
+            const path = document.createElement('span');
+            path.className = 'path';
+            path.textContent = '~';
+            
+            const dollar = document.createElement('span');
+            dollar.textContent = '$ ';
+            dollar.style.color = '#fff';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'userInput';
+            input.className = 'command';
+            input.autocomplete = 'off';
+            
+            inputContainer.appendChild(prompt);
+            inputContainer.appendChild(sep);
+            inputContainer.appendChild(path);
+            inputContainer.appendChild(dollar);
+            inputContainer.appendChild(input);
+            
+            terminal.appendChild(inputContainer);
+            input.focus();
+            scrollToBottom();
+            
+            input.addEventListener('keydown', handleInput);
+        }
+
+        async function handleInput(e) {
+            if (e.key === 'Enter') {
+                const input = e.target;
+                const command = input.value;
+                
+                if (command.trim()) {
+                    commandHistory.unshift(command);
+                    historyIndex = -1;
+                }
+                
+                // Remove input line
+                const inputContainer = document.getElementById('inputContainer');
+                inputContainer.remove();
+                
+                // Show the command that was entered
+                const terminal = document.getElementById('terminal');
+                const cmdLine = document.createElement('div');
+                cmdLine.className = 'command-line';
+                cmdLine.innerHTML = `<span class="prompt">developer@portfolio</span><span style="color:#fff">:</span><span class="path">~</span><span style="color:#fff">$ </span><span class="command">${command}</span>`;
+                terminal.appendChild(cmdLine);
+                
+                // Execute command
+                if (command.trim()) {
+                    await executeCommand(command);
+                }
+                
+                // Create new input line
+                createInputLine();
+                
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    e.target.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    e.target.value = commandHistory[historyIndex];
+                } else if (historyIndex === 0) {
+                    historyIndex = -1;
+                    e.target.value = '';
+                }
+            }
+        }
+
+        function restartAnimation() {
+            runTerminal();
+        }
+
+        // Start the animation when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runTerminal, 500);
+        });
+
+        // Keep input focused
+        document.addEventListener('click', () => {
+            if (!isAnimating) {
+                const input = document.getElementById('userInput');
+                if (input) input.focus();
+            }
+        });
+    </script>
+</body>
+</html>
